@@ -1,0 +1,12 @@
+feature,importance,std
+Delay code (reason),0.614,0.017
+Station × hour,0.057,0.023
+Station,0.03,0.005
+Hour (cyclic),0.027,0.004
+Day of week,0.02,0.002
+Line,0.014,0.003
+Direction,0.012,0.002
+Rush hour,0.003,0.001
+Weekend,0.002,0.001
+Hour of day,0.001,0.001
+Month,0.0,0.003

@@ -1,0 +1,6 @@
+feature_set,n_features,coverage,median_width,winkler
+time only,7,0.942,16.6,32.63
++ station,9,0.91,13.0,35.66
++ line,10,0.909,13.1,35.51
++ delay code,11,0.907,10.7,26.56
++ direction (full),12,0.899,10.6,26.49

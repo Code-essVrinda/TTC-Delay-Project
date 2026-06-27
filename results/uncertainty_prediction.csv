@@ -1,0 +1,4 @@
+band,n,mean_actual_error,mean_interval_width,coverage
+1 low,1826,1.76,7.32,0.92
+2 medium,1825,3.11,11.44,0.91
+3 high,1825,5.37,19.58,0.88

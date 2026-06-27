@@ -1,0 +1,5 @@
+nominal_%,empirical_coverage,median_width_min
+80,0.794,7.5
+85,0.846,8.7
+90,0.903,10.7
+95,0.952,14.6
