@@ -64,6 +64,221 @@ The project only covers the lines that are in this historical data: Line 1 (Yong
 The newer TTC lines, like the Eglinton Crosstown (Line 5) and Finch West (Line 6), are not supported,
 because the data does not include them yet.
 
+### Stations covered
+
+These are the exact station names the model is trained on, grouped by line. The cleaning step maps all
+the raw spellings, typos, and aliases in the data to these canonical names (uppercase, with punctuation
+kept). The interchange stations (`SHEPPARD-YONGE`, `BLOOR-YONGE`, `ST. GEORGE`, `SPADINA`) appear on
+both of their lines. Line 3 (SRT) stations are dropped before training and are not listed.
+
+<details>
+<summary><b>Line 1 — Yonge-University (YU), 38 stations</b></summary>
+
+```
+FINCH, NORTH YORK CENTRE, SHEPPARD-YONGE, YORK MILLS, LAWRENCE, EGLINTON, DAVISVILLE, ST. CLAIR,
+SUMMERHILL, ROSEDALE, BLOOR-YONGE, WELLESLEY, COLLEGE, TMU, QUEEN, KING, UNION, ST. ANDREW, OSGOODE,
+ST. PATRICK, QUEEN'S PARK, MUSEUM, ST. GEORGE, SPADINA, DUPONT, ST. CLAIR WEST, CEDARVALE, GLENCAIRN,
+LAWRENCE WEST, YORKDALE, WILSON, SHEPPARD WEST, DOWNSVIEW PARK, FINCH WEST, YORK UNIVERSITY,
+PIONEER VILLAGE, HIGHWAY 407, VAUGHAN METROPOLITAN CENTRE
+```
+
+`TMU` was formerly `DUNDAS`, `CEDARVALE` was formerly `EGLINTON WEST`, `SHEPPARD WEST` was formerly `DOWNSVIEW`.
+</details>
+
+<details>
+<summary><b>Line 2 — Bloor-Danforth (BD), 31 stations</b></summary>
+
+```
+KIPLING, ISLINGTON, ROYAL YORK, OLD MILL, JANE, RUNNYMEDE, HIGH PARK, KEELE, DUNDAS WEST, LANSDOWNE,
+DUFFERIN, OSSINGTON, CHRISTIE, BATHURST, SPADINA, ST. GEORGE, BAY, BLOOR-YONGE, SHERBOURNE,
+CASTLE FRANK, BROADVIEW, CHESTER, PAPE, DONLANDS, GREENWOOD, COXWELL, WOODBINE, MAIN STREET,
+VICTORIA PARK, WARDEN, KENNEDY
+```
+</details>
+
+<details>
+<summary><b>Line 4 — Sheppard (SHP), 5 stations</b></summary>
+
+```
+SHEPPARD-YONGE, BAYVIEW, BESSARION, LESLIE, DON MILLS
+```
+</details>
+
+The canonical mapping lives in `STATION_LINE_MAP` and `STATION_ORDER` in `src/data/cleaning.py`.
+
+### Delay codes
+
+The delay code is the single most important feature in the model (see the ablation and importance
+results below). Each code is a short TTC code for the cause of the incident. The full reference is in
+`data/raw/ttc-subway-delay-codes.xlsx`. Codes are grouped by family by their prefix: `EU` (rail-car /
+equipment), `MU` (general / miscellaneous, incl. medical, fire, weather), `PU` (infrastructure —
+signals, track, traction power, stations), `SU` (security / patron), and `TU` (transportation — crew
+and control). The SRT (`ER*` / `MR*`) codes belong to the closed Line 3 and are not used.
+
+<details>
+<summary><b>EU — Rail cars & shops / equipment (29 codes)</b></summary>
+
+| Code | Description |
+|---|---|
+| EUAC | Air Conditioning |
+| EUAL | Alternating Current |
+| EUATC | ATC RC&S Equipment |
+| EUBK | Brakes |
+| EUBO | Body |
+| EUCA | Compressed Air |
+| EUCD | Consequential Delay (2nd Delay Same Fault) |
+| EUCH | Chopper Control |
+| EUCO | Couplers |
+| EUDO | Door Problems - Faulty Equipment |
+| EUECD | ECD / Line Mechanic Related Prob. |
+| EUHV | High Voltage |
+| EULT | Lighting System |
+| EULV | Low Voltage |
+| EUME | RC&S Maintenance Error - (Human) |
+| EUNEA | No Equipment Available |
+| EUNT | Equipment - No Trouble Found |
+| EUO | RC&S Other |
+| EUOE | Rail Cars & Shops Opr. Error |
+| EUOPO | OPTO RC&S Non-Train Door Monitoring |
+| EUPI | Propulsion System |
+| EUSC | Speed Control Equipment |
+| EUTL | Trainline System |
+| EUTM | Traction Motors |
+| EUTR | Trucks |
+| EUTRD | TR Cab Doors |
+| EUVA | Warning Alarm Systems |
+| EUVE | Work Vehicle |
+| EUYRD | Yard/Carhouse Related Problems |
+</details>
+
+<details>
+<summary><b>MU — General / miscellaneous (medical, fire, weather, ops) (29 codes)</b></summary>
+
+| Code | Description |
+|---|---|
+| MUATC | ATC Project |
+| MUCL | Divisional Clerk Related |
+| MUD | Door Problems - Passenger Related |
+| MUDD | Door Problems - Debris Related |
+| MUEC | Misc. Engineering & Construction Related Problems |
+| MUESA | No Operator Immediately Available |
+| MUFM | Force Majeure |
+| MUFS | Fire/Smoke Plan B - Source External to TTC |
+| MUGD | Miscellaneous General Delays |
+| MUI | Injured or ill Customer (On Train) - Transported |
+| MUIE | Injured Employee |
+| MUIR | Injured or ill Customer (On Train) - Medical Aid Refused |
+| MUIRS | Injured or ill Customer (In Station) - Medical Aid Refused |
+| MUIS | Injured or ill Customer (In Station) - Transported |
+| MULD | Labour Dispute - Subway |
+| MUNOA | No Operator Immediately Available - Not E.S.A. Related |
+| MUO | Miscellaneous Other |
+| MUODC | Overhead Door Contact |
+| MUPAA | Passenger Assistance Alarm Activated - No Trouble Found |
+| MUPLA | Fire/Smoke Plan A |
+| MUPLB | Fire/Smoke Plan B - Source TTC |
+| MUPLC | Fire/Smoke Plan C |
+| MUPR1 | Priority One - Train in Contact With Person |
+| MUSAN | Unsanitary Vehicle |
+| MUSC | Miscellaneous Speed Control |
+| MUTD | Training Department Related Delays |
+| MUTO | Misc. Transportation Other - Employee Non-Chargeable |
+| MUWEA | Weather Reports / Related Delays |
+| MUWR | Work Refusal |
+</details>
+
+<details>
+<summary><b>PU — Infrastructure: signals, track, traction power, stations (42 codes)</b></summary>
+
+| Code | Description |
+|---|---|
+| PUATC | ATC Signals Other |
+| PUCBI | Central Logic Controller Failure |
+| PUCSC | Signal Control Problem - Signals |
+| PUCSS | Central Office Signalling System |
+| PUDCS | Data Communications System Failure |
+| PUMEL | Escalator/Elevator Incident |
+| PUMO | Station Other |
+| PUMST | Station Stairway Incident |
+| PUOPO | OPTO (COMMS) Train Door Monitoring |
+| PUSAC | Signals Axle Counter Block Failure |
+| PUSBE | Beacon Failure |
+| PUSCA | SCADA Related Problems |
+| PUSCR | Subway Car Radio Fault |
+| PUSEA | EAS Failure |
+| PUSI | Signals or Related Components Failure |
+| PUSIO | Smart IO Failure |
+| PUSIS | Signals Track Weather Related |
+| PUSLC | Signals Line Countroller Failure |
+| PUSNT | Signal Problem - No Trouble |
+| PUSO | S/E/C Department Other |
+| PUSRA | Subway Radio System Fault |
+| PUSSW | Track Switch Failure - Signal Related Problem |
+| PUSTC | Signals - Track Circuit Problems |
+| PUSTP | Traction Power or Related Components Failure |
+| PUSTS | Signals - Train Stops |
+| PUSWZ | Work Zone Problems - Signals |
+| PUSZC | Signals Zone Countroller Failure |
+| PUTCD | T & S Contractor Problems |
+| PUTD | Track Level Debris - Controllable |
+| PUTDN | Debris At Track Level - Uncontrollable |
+| PUTIJ | Insulated Joint Related Problem |
+| PUTIS | Ice / Snow Related Problems |
+| PUTNT | T&S Related Problem - NTF |
+| PUTO | T&S Other |
+| PUTOE | T & S Operator Related Problems |
+| PUTR | Rail Related Problem |
+| PUTS | Structure Related Problem |
+| PUTSC | Signal Control Problem - Track |
+| PUTSM | Track Switch Failure - Track Related Problem |
+| PUTTC | Track Circuit Problems - Re: Defective Bolts/Bonding |
+| PUTTP | Traction Power Rail Related |
+| PUTWZ | Work Zone Problems - Track |
+</details>
+
+<details>
+<summary><b>SU — Security / patron incidents (13 codes)</b></summary>
+
+| Code | Description |
+|---|---|
+| SUAE | Assault / Employee Involved |
+| SUAP | Assault / Patron Involved |
+| SUBT | Bomb Threat |
+| SUCOL | Collector Booth Alarm Activated |
+| SUDP | Disorderly Patron |
+| SUEAS | Emergency Alarm Station Activation |
+| SUG | Graffiti / Scratchiti |
+| SUO | Passenger Other |
+| SUPOL | Held By Police - Non-TTC Related |
+| SUROB | Robbery |
+| SUSA | Sexual Assault |
+| SUSP | Suspicious Package |
+| SUUT | Unauthorized at Track Level |
+</details>
+
+<details>
+<summary><b>TU — Transportation: crew & control (16 codes)</b></summary>
+
+| Code | Description |
+|---|---|
+| TUATC | ATC Operator Related |
+| TUCC | Transit Control Related Problems |
+| TUDOE | Doors Open in Error |
+| TUKEY | Two Drum Switch Keys Activated |
+| TUML | Mainline Storage |
+| TUMVS | Operator Violated Signal |
+| TUNIP | Operator Not In Position |
+| TUNOA | No Operator Immediately Available |
+| TUO | Transportation Department - Other |
+| TUOPO | OPTO Operator Related |
+| TUOS | Operator Overshot Platform |
+| TUS | Crew Unable to Maintain Schedule |
+| TUSC | Operator Overspeeding |
+| TUSET | Train Controls Improperly Shut Down |
+| TUST | Storm Trains |
+| TUSUP | Supervisory Error |
+</details>
+
 ## Method
 
 - **Features.** Only things known at incident time: time of day and week, station, line, direction,
